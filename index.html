@@ -1,0 +1,572 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>ARCHBELL FALCONS - eFootball Club</title>
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700&family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
+  <meta name="theme-color" content="#071026">
+  <style>
+    /* ---------- THEME & RESET ---------- */
+    :root{
+      --bg:#071026; --card:#0e1624; --muted:#9fb0c7; --accent:#00d4ff; --accent2:#7c4dff;
+      --text:#e6eef7; --glass:rgba(255,255,255,0.03); --radius:12px; --shadow:0 10px 30px rgba(2,6,23,0.6);
+    }
+    *{box-sizing:border-box} html,body{height:100%}
+    body{margin:0;font-family:"Poppins",system-ui,-apple-system,Segoe UI,Roboto,Arial; background:linear-gradient(180deg,var(--bg),#031019 80%); color:var(--text); -webkit-font-smoothing:antialiased}
+    a{color:inherit}
+    .container{max-width:1100px;margin:0 auto;padding:0 20px}
+
+    /* ---------- HEADER ---------- */
+    header{position:sticky;top:0;background:rgba(3,7,15,0.5);backdrop-filter:blur(6px);border-bottom:1px solid rgba(255,255,255,0.02);z-index:80}
+    .header-inner{height:72px;display:flex;align-items:center;justify-content:space-between}
+    .logo{display:flex;align-items:center;gap:12px}
+    .logo img{width:52px;height:52px;border-radius:10px;object-fit:cover;background:linear-gradient(135deg,var(--accent),var(--accent2));padding:4px;box-shadow:var(--shadow)}
+    .logo h1{margin:0;font-family:"Orbitron",sans-serif;font-size:1.05rem}
+    nav ul{display:flex;gap:16px;list-style:none;margin:0;padding:0}
+    nav a{padding:8px 10px;border-radius:8px;text-decoration:none;transition:all .16s}
+    nav a.active{background:linear-gradient(90deg,var(--accent),var(--accent2));color:#021026;font-weight:700}
+    .mobile-toggle{display:none}
+
+    /* ---------- HERO ---------- */
+    .hero{min-height:calc(100vh - 72px);display:flex;align-items:center;padding:56px 0}
+    .hero-grid{display:grid;grid-template-columns:1fr 380px;gap:28px;align-items:start}
+    .hero-card{background:linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.00));padding:28px;border-radius:18px;box-shadow:var(--shadow)}
+    .hero h2{font-family:"Orbitron",sans-serif;font-size:2.2rem;margin:0 0 10px}
+    .hero p{color:var(--muted);margin:0 0 18px}
+    .btn{display:inline-block;background:linear-gradient(90deg,var(--accent),var(--accent2));padding:10px 14px;border-radius:12px;color:#021026;font-weight:700;text-decoration:none}
+
+    /* ---------- PLAYER GRID ---------- */
+    .section-title{font-family:"Orbitron",sans-serif;text-transform:uppercase;letter-spacing:1px;font-size:1rem;margin:0}
+    .players-controls{display:flex;gap:8px;margin-top:14px;flex-wrap:wrap}
+    .pill{background:var(--glass);padding:8px 10px;border-radius:999px;cursor:pointer;border:1px solid rgba(255,255,255,0.02)}
+    .player-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:12px;margin-top:16px}
+    .player-card{background:var(--card);padding:12px;border-radius:12px;display:flex;gap:12px;align-items:center;cursor:pointer;border:1px solid rgba(255,255,255,0.02);transition:transform .14s}
+    .player-card:hover{transform:translateY(-6px)}
+    .avatar{width:56px;height:56px;border-radius:10px;display:grid;place-items:center;font-weight:700;font-family:"Orbitron",sans-serif;color:#021026;background:linear-gradient(135deg,var(--accent),var(--accent2))}
+    .player-info h3{margin:0;font-size:0.98rem}
+    .player-info p{margin:4px 0 0 0;color:var(--muted);font-size:0.85rem}
+    .badge{padding:6px 8px;border-radius:8px;font-weight:700;font-size:0.78rem;color:#021026;background:linear-gradient(90deg,var(--accent),var(--accent2));margin-left:auto}
+
+    /* MVP badge corner */
+    .player-card .mvp{position:relative}
+    .player-card .mvp::after{content:"MVP";position:absolute;top:-8px;right:-8px;background:gold;color:#102020;padding:6px 8px;border-radius:8px;font-weight:800;font-size:0.7rem;box-shadow:0 6px 16px rgba(0,0,0,0.45)}
+
+    /* ---------- MODAL ---------- */
+    .modal-backdrop{position:fixed;inset:0;background:rgba(2,6,15,0.6);display:none;align-items:center;justify-content:center;z-index:120;padding:20px}
+    .modal-backdrop.open{display:flex}
+    .modal{background:var(--card);max-width:780px;width:100%;border-radius:14px;padding:18px;box-shadow:0 20px 60px rgba(2,6,23,0.7)}
+    .modal-header{display:flex;align-items:center;gap:12px}
+    .modal-grid{display:grid;grid-template-columns:220px 1fr;gap:14px;margin-top:12px}
+    .stat-list{display:flex;flex-direction:column;gap:8px;margin-top:10px}
+    .stat-pill{background:var(--glass);padding:8px;border-radius:10px;font-weight:600;color:var(--muted)}
+
+    /* ---------- MATCH SCHEDULES & RESULTS ---------- */
+    .matches{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+    .match-card{background:var(--card);padding:12px;border-radius:12px;border:1px solid rgba(255,255,255,0.02)}
+    .match-header{display:flex;align-items:center;justify-content:space-between}
+    .result-win{color:var(--success,#4ade80);font-weight:800}
+    .result-loss{color:#ff6b6b;font-weight:800}
+    .small{font-size:0.85rem;color:var(--muted)}
+
+    /* ---------- TOURNAMENTS / TROPHIES ---------- */
+    .trophies{display:flex;gap:12px;flex-wrap:wrap}
+    .trophy{background:linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.00));padding:12px;border-radius:12px;min-width:140px;text-align:center}
+    .trophy .num{font-family:"Orbitron",sans-serif;font-size:1.6rem;margin-top:6px}
+
+    /* ---------- FORMATION ---------- */
+    .formation{background:var(--card);padding:16px;border-radius:12px}
+    .field{background:linear-gradient(180deg,#06202b,#04202a);border-radius:8px;padding:10px;display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+    .pos{background:rgba(255,255,255,0.03);border-radius:8px;padding:8px;display:grid;place-items:center;font-weight:700;color:var(--muted)}
+    .pos .initials{background:linear-gradient(135deg,var(--accent),var(--accent2));width:44px;height:44px;border-radius:8px;display:grid;place-items:center;color:#021026;font-weight:800}
+
+    /* ---------- HIGHLIGHTS ---------- */
+    .highlights{display:flex;gap:12px;align-items:flex-start;flex-wrap:wrap}
+    .thumb{width:120px;height:72px;border-radius:8px;background:linear-gradient(90deg,var(--accent),var(--accent2));display:grid;place-items:center;color:#021026;font-weight:800;cursor:pointer}
+
+    /* ---------- FOOTER ---------- */
+    footer{padding:20px 0;text-align:center;color:var(--muted);border-top:1px solid rgba(255,255,255,0.02);margin-top:26px}
+
+    /* ---------- RESPONSIVE ---------- */
+    @media(max-width:980px){
+      .hero-grid{grid-template-columns:1fr}
+      nav ul{display:none}
+      .mobile-toggle{display:inline-block}
+      .matches{grid-template-columns:1fr}
+      .modal-grid{grid-template-columns:1fr}
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="container header-inner">
+      <div class="logo">
+        <img src="falcon_photo.jpg" alt="Falcon Logo" onerror="this.style.display='none'">
+        <h1>ARCHBELL FALCONS</h1>
+      </div>
+      <nav aria-label="Main Navigation">
+        <ul>
+          <li><a href="#home" class="active">Home</a></li>
+          <li><a href="#about">About</a></li>
+          <li><a href="#players">Players</a></li>
+          <li><a href="#matches">Matches</a></li>
+          <li><a href="#trophies">Trophies</a></li>
+          <li><a href="#contact">Contact</a></li>
+        </ul>
+      </nav>
+      <div style="display:flex;gap:10px;align-items:center">
+        <a class="pill" href="#players" title="Roster">Roster</a>
+        <a class="pill" href="#matches" title="Matches">Schedule</a>
+      </div>
+    </div>
+  </header>
+
+  <main class="container" id="home" style="padding-top:28px">
+    <!-- HERO -->
+    <section class="hero">
+      <div class="hero-grid" style="width:100%">
+        <div class="hero-card">
+          <h2>Unleash The Falcon Within</h2>
+          <p>Join the elite ARCHBELL FALCONS — mobile eFootball squad focused on tactics, ball control, and dominating tournaments.</p>
+          <a class="btn" href="#players">Meet the Squad</a>
+
+          <!-- quick stats -->
+          <div style="display:flex;gap:12px;margin-top:18px;flex-wrap:wrap">
+            <div style="background:var(--card);padding:12px;border-radius:12px;min-width:120px">
+              <div class="small">Matches Played</div>
+              <div style="font-family:Orbitron,monospace;font-size:1.4rem">120</div>
+            </div>
+            <div style="background:var(--card);padding:12px;border-radius:12px;min-width:120px">
+              <div class="small">Win Rate</div>
+              <div id="winRate" style="font-family:Orbitron,monospace;font-size:1.4rem">--%</div>
+            </div>
+            <div style="background:var(--card);padding:12px;border-radius:12px;min-width:120px">
+              <div class="small">Trophies</div>
+              <div id="trophyCount" style="font-family:Orbitron,monospace;font-size:1.4rem">0</div>
+            </div>
+          </div>
+
+          <!-- formation preview -->
+          <div style="margin-top:18px">
+            <h3 style="margin:8px 0 6px 0;font-size:1rem">Team Formation (Preview)</h3>
+            <div class="formation">
+              <div class="field" aria-hidden="true">
+                <div class="pos"><div class="initials">SJ</div><div style="font-size:0.78rem;color:var(--muted);margin-top:6px">Captain</div></div>
+                <div class="pos"><div class="initials">HS</div><div style="font-size:0.78rem;color:var(--muted);margin-top:6px">VC</div></div>
+                <div class="pos"><div class="initials">IK</div><div style="font-size:0.78rem;color:var(--muted);margin-top:6px">CAM</div></div>
+                <div class="pos"><div class="initials">SH</div></div>
+                <div class="pos"><div class="initials">AR</div></div>
+                <div class="pos"><div class="initials">BK</div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- HIGHLIGHTS + UPCOMING -->
+        <aside style="display:flex;flex-direction:column;gap:12px">
+          <div class="hero-card" aria-label="Upcoming match">
+            <h3 style="margin:0 0 6px 0">Next Match</h3>
+            <div style="display:flex;align-items:center;justify-content:space-between">
+              <div>
+                <div style="font-weight:700">Vs. Red Comets</div>
+                <div class="small">Dec 20, 2025 • 8:00 PM (BDT)</div>
+                <div class="small" style="margin-top:6px">Tournament: Spring Invitational</div>
+              </div>
+              <div>
+                <a class="btn" href="#matches">Details</a>
+              </div>
+            </div>
+          </div>
+
+          <div class="hero-card">
+            <h3 style="margin:0 0 10px 0">Highlights</h3>
+            <div class="highlights">
+              <div class="thumb" data-video="highlight1.mp4" tabindex="0" role="button" aria-label="Open highlight 1">H1</div>
+              <div class="thumb" data-video="highlight2.mp4" tabindex="0" role="button" aria-label="Open highlight 2">H2</div>
+              <div class="thumb" data-video="highlight3.mp4" tabindex="0" role="button" aria-label="Open highlight 3">H3</div>
+            </div>
+            <div style="margin-top:10px" class="small">Click thumbnails to view highlights (replace placeholders with real video links).</div>
+          </div>
+        </aside>
+      </div>
+    </section>
+
+    <!-- ABOUT -->
+    <section id="about" style="margin-top:18px">
+      <h3 class="section-title">About Our Club</h3>
+      <p style="color:var(--muted);margin-top:8px">ARCHBELL FALCONS is a competitive eFootball mobile club that trains daily, analyzes gameplay footage, and competes in regional and online tournaments. Our coaching focuses on formation, passing chains, and clutch finishing.</p>
+    </section>
+
+    <!-- PLAYERS -->
+    <section id="players" style="margin-top:20px">
+      <div style="display:flex;justify-content:space-between;align-items:center">
+        <div>
+          <h3 class="section-title">Meet Our Players</h3>
+          <div class="players-controls" role="tablist" aria-label="Player filters" style="margin-top:8px">
+            <button class="pill" data-filter="all">All</button>
+            <button class="pill" data-filter="captain">Captain</button>
+            <button class="pill" data-filter="vice">Vice</button>
+            <button class="pill" data-filter="player">Players</button>
+            <button class="pill" data-filter="mvp">MVP</button>
+          </div>
+        </div>
+        <div style="text-align:right">
+          <div class="small">Search / Sort</div>
+          <input id="playerSearch" placeholder="Search player" style="padding:8px;border-radius:10px;background:var(--card);border:1px solid rgba(255,255,255,0.02);color:var(--text)">
+        </div>
+      </div>
+
+      <div class="player-grid" id="playerGrid" style="margin-top:14px" aria-live="polite">
+        <!-- JS renders player cards here -->
+      </div>
+    </section>
+
+    <!-- MATCHES -->
+    <section id="matches" style="margin-top:26px">
+      <h3 class="section-title">Matches & Results</h3>
+      <div style="margin-top:12px" class="matches">
+        <div class="match-card">
+          <div class="match-header">
+            <div><strong>Dec 01, 2025</strong> • Friendly</div>
+            <div class="small">Venue: Online</div>
+          </div>
+          <div style="display:flex;align-items:center;gap:12px;margin-top:10px">
+            <div style="font-weight:800">Archbell Falcons</div>
+            <div style="font-weight:800">3 — 1</div>
+            <div style="font-weight:600;color:var(--muted)">Blue Rivals</div>
+          </div>
+          <div class="small" style="margin-top:10px">Top performer: Shahadat Jamil Shishir (2 goals)</div>
+        </div>
+
+        <div class="match-card">
+          <div class="match-header">
+            <div><strong>Nov 14, 2025</strong> • Tournament</div>
+            <div class="small">Venue: Dhaka Arena</div>
+          </div>
+          <div style="display:flex;align-items:center;gap:12px;margin-top:10px">
+            <div style="font-weight:800">Archbell Falcons</div>
+            <div style="font-weight:800;color:#ff6b6b">0 — 2</div>
+            <div style="font-weight:600;color:var(--muted)">Elite FC</div>
+          </div>
+          <div class="small" style="margin-top:10px">Notes: Tough defensive battle; we'll analyze film.</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- TROPHIES -->
+    <section id="trophies" style="margin-top:26px">
+      <h3 class="section-title">Tournaments & Trophies</h3>
+      <div style="margin-top:12px" class="trophies">
+        <div class="trophy">
+          <div class="small">Tournaments Won</div>
+          <div id="tournamentsWon" class="num">0</div>
+        </div>
+        <div class="trophy">
+          <div class="small">Runner-ups</div>
+          <div id="runnerUps" class="num">0</div>
+        </div>
+        <div class="trophy">
+          <div class="small">Top 8 Finishes</div>
+          <div id="top8" class="num">0</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- SUBSCRIBE & CONTACT -->
+    <section id="contact" style="margin-top:26px;display:flex;gap:18px;align-items:center;flex-wrap:wrap">
+      <div style="flex:1;min-width:260px">
+        <h3 class="section-title">Join The Falcons</h3>
+        <p style="color:var(--muted);margin-top:8px">Want to try out or receive updates? Subscribe to the newsletter or email us.</p>
+        <form id="subscribeForm" style="display:flex;gap:8px;margin-top:10px;flex-wrap:wrap">
+          <input id="subEmail" type="email" placeholder="you@example.com" required style="padding:10px;border-radius:10px;background:var(--card);border:1px solid rgba(255,255,255,0.02);min-width:200px;color:var(--text)">
+          <button class="btn" type="submit">Subscribe</button>
+        </form>
+        <div id="subMsg" class="small" style="margin-top:8px;color:var(--muted)"></div>
+        <div style="margin-top:12px;display:flex;gap:8px">
+          <a class="pill" href="mailto:archbellfalcons@gmail.com">Email</a>
+          <a class="pill" href="#" title="Discord (replace link)">Discord</a>
+          <a class="pill" href="#" title="YouTube (replace link)">YouTube</a>
+        </div>
+      </div>
+
+      <div style="min-width:220px">
+        <h3 class="section-title">Coach Notes</h3>
+        <p style="color:var(--muted);margin-top:8px">We review match tapes weekly and run focused drills for finishing, ball control, and set-piece routines.</p>
+      </div>
+    </section>
+
+    <footer>
+      <p>© 2025 ARCHBELL FALCONS | Designed with ❤️ by Team Falcons</p>
+    </footer>
+  </main>
+
+  <!-- PLAYER MODAL & HIGHLIGHT MODAL -->
+  <div id="modalBackdrop" class="modal-backdrop" role="dialog" aria-modal="true" aria-hidden="true">
+    <div class="modal" role="document" aria-labelledby="modalTitle">
+      <div style="display:flex;justify-content:space-between;align-items:center">
+        <div class="modal-header">
+          <div id="modalAvatar" class="avatar" style="width:64px;height:64px;border-radius:10px"></div>
+          <div>
+            <h3 id="modalTitle" style="margin:0">Player Name</h3>
+            <div id="modalRole" class="small">Role</div>
+          </div>
+        </div>
+        <div>
+          <button id="modalClose" class="pill" aria-label="Close modal">Close</button>
+        </div>
+      </div>
+
+      <div class="modal-grid">
+        <div>
+          <div class="stat-list">
+            <div class="stat-pill">K/D Ratio: <strong id="statKD">0.00</strong></div>
+            <div class="stat-pill">Avg Rating: <strong id="statRating">0.0</strong></div>
+            <div class="stat-pill">Goals: <strong id="statGoals">0</strong></div>
+            <div class="stat-pill">Assists: <strong id="statAssists">0</strong></div>
+            <div class="stat-pill">Matches: <strong id="statMatches">0</strong></div>
+          </div>
+        </div>
+        <div>
+          <h4 style="margin:0 0 8px 0">Bio & Recent Form</h4>
+          <p id="modalBio" style="color:var(--muted);margin-top:6px">Player biography and notes appear here.</p>
+          <h4 style="margin:12px 0 6px 0">Recent Matches</h4>
+          <div id="recentMatches" style="display:flex;gap:8px;flex-wrap:wrap"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- HIGHLIGHT PLAYER PREVIEW (simple) -->
+  <div id="videoBackdrop" class="modal-backdrop" aria-hidden="true">
+    <div class="modal" style="max-width:900px">
+      <div style="display:flex;justify-content:space-between;align-items:center">
+        <h3 style="margin:0">Match Highlight</h3>
+        <button id="videoClose" class="pill">Close</button>
+      </div>
+      <div style="margin-top:12px">
+        <!-- Placeholder for embedded video; replace src with actual video or embed link -->
+        <div id="videoPlayer" style="background:#000;height:420px;border-radius:10px;display:grid;place-items:center;color:var(--muted)">Video placeholder</div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    /* ---------- DATA ---------- */
+    const players = [
+      { id:1, name:"Shahadat Jamil Shishir", role:"Captain", kd:2.1, rating:9.2, goals:35, assists:12, matches:78, bio:"Strategic captain known for clutch goals and calm leadership.", mvp:true },
+      { id:2, name:"Hasib Mahmud Saad", role:"Vice Captain", kd:1.8, rating:8.9, goals:22, assists:18, matches:74, bio:"Tactical playmaker and set-piece specialist.", mvp:true },
+      { id:3, name:"Imrul Kayes Shifat", role:"Player", kd:1.5, rating:8.2, goals:14, assists:10, matches:50, bio:"Solid defender with great positioning." },
+      { id:4, name:"Shahriar Ahmed", role:"Player", kd:1.3, rating:7.8, goals:10, assists:7, matches:42, bio:"Fast winger with quick dribbles." },
+      { id:5, name:"Ahsan Rakib", role:"Player", kd:1.2, rating:7.5, goals:8, assists:9, matches:40, bio:"Reliable rotational player." },
+      { id:6, name:"Badhon Khan", role:"Player", kd:1.4, rating:7.9, goals:11, assists:6, matches:46, bio:"Great at zone defense." },
+      { id:7, name:"Rohan Ahmed", role:"Player", kd:1.1, rating:7.3, goals:5, assists:4, matches:30, bio:"Promising rookie." },
+      { id:8, name:"Gofranur Rahman Rahin", role:"Player", kd:1.6, rating:8.0, goals:12, assists:11, matches:58, bio:"High workrate midfielder." },
+      { id:9, name:"Tarhan Masud", role:"Player", kd:1.0, rating:7.0, goals:3, assists:2, matches:20, bio:"Defensive anchor." },
+      { id:10, name:"Shakib Al Fahad", role:"Player", kd:1.05, rating:7.2, goals:4, assists:3, matches:22, bio:"Set-piece taker occasionally." },
+      { id:11, name:"Sk Tanim Ahmed", role:"Player", kd:0.95, rating:6.9, goals:2, assists:3, matches:18, bio:"Young prospect." },
+      { id:12, name:"Oywon Islam Saim", role:"Player", kd:1.25, rating:7.6, goals:7, assists:5, matches:34, bio:"Versatile sub." },
+      { id:13, name:"Mohammed Mishkatul Huda", role:"Player", kd:1.3, rating:7.7, goals:9, assists:6, matches:38, bio:"Box-to-box midfielder." },
+      { id:14, name:"Touhidul Islam Tuhin", role:"Player", kd:1.15, rating:7.4, goals:6, assists:4, matches:32, bio:"Tactical depth." },
+      { id:15, name:"Rahid Hasan", role:"Player", kd:1.05, rating:7.1, goals:4, assists:3, matches:28, bio:"Reliable bench player." },
+      { id:16, name:"Bappy Hasan", role:"Player", kd:1.0, rating:7.0, goals:3, assists:2, matches:24, bio:"Team player." },
+      { id:17, name:"Jubayer Tanvir", role:"Player", kd:1.08, rating:7.15, goals:5, assists:4, matches:26, bio:"Consistent performer." }
+    ];
+
+    const matches = [
+      { date:'2025-12-20', opponent:'Red Comets', type:'Tournament', time:'20:00', timezone:'BDT' },
+      { date:'2025-12-01', opponent:'Blue Rivals', type:'Friendly', time:'19:00', timezone:'BDT', result:{for:3,against:1,top:'Shahadat Jamil Shishir'} },
+      { date:'2025-11-14', opponent:'Elite FC', type:'Tournament', time:'18:00', timezone:'BDT', result:{for:0,against:2}}
+    ];
+
+    const trophyData = { won:4, runnerUps:2, top8:9 };
+
+    /* ---------- HELPERS ---------- */
+    function initials(name){
+      const parts = name.trim().split(/\s+/);
+      if(parts.length===1) return parts[0].slice(0,2).toUpperCase();
+      return (parts[0][0] + parts[parts.length-1][0]).toUpperCase();
+    }
+
+    /* ---------- RENDER PLAYERS ---------- */
+    const grid = document.getElementById('playerGrid');
+    function renderPlayers(list){
+      grid.innerHTML = '';
+      list.forEach(p=>{
+        const card = document.createElement('button');
+        card.className = 'player-card' + (p.mvp ? ' mvp' : '');
+        card.setAttribute('data-id', p.id);
+        card.setAttribute('aria-haspopup','dialog');
+        card.innerHTML = `
+          <div class="avatar">${initials(p.name)}</div>
+          <div class="player-info">
+            <h3>${p.name}</h3>
+            <p>${p.role}</p>
+          </div>
+          <div class="badge">${p.kd.toFixed(2)}</div>
+        `;
+        card.addEventListener('click', ()=> openPlayerModal(p.id));
+        grid.appendChild(card);
+      });
+    }
+    renderPlayers(players);
+
+    /* ---------- FILTERS & SEARCH ---------- */
+    document.querySelectorAll('[data-filter]').forEach(btn=>{
+      btn.addEventListener('click', ()=> {
+        const f = btn.getAttribute('data-filter');
+        let out = players;
+        if(f === 'captain') out = players.filter(p=>/captain/i.test(p.role));
+        else if(f === 'vice') out = players.filter(p=>/vice/i.test(p.role));
+        else if(f === 'player') out = players.filter(p=>/player/i.test(p.role.toLowerCase()));
+        else if(f === 'mvp') out = players.filter(p=>p.mvp);
+        renderPlayers(out);
+      });
+    });
+    document.getElementById('playerSearch').addEventListener('input', (e)=>{
+      const q = e.target.value.toLowerCase().trim();
+      renderPlayers(players.filter(p => p.name.toLowerCase().includes(q)));
+    });
+
+    /* ---------- PLAYER MODAL ---------- */
+    const modalBackdrop = document.getElementById('modalBackdrop');
+    const modalAvatar = document.getElementById('modalAvatar');
+    const modalTitle = document.getElementById('modalTitle');
+    const modalRole = document.getElementById('modalRole');
+    const modalBio = document.getElementById('modalBio');
+    const statKD = document.getElementById('statKD');
+    const statRating = document.getElementById('statRating');
+    const statGoals = document.getElementById('statGoals');
+    const statAssists = document.getElementById('statAssists');
+    const statMatches = document.getElementById('statMatches');
+    const recentMatches = document.getElementById('recentMatches');
+    const modalClose = document.getElementById('modalClose');
+
+    function openPlayerModal(id){
+      const p = players.find(x=>x.id===id);
+      if(!p) return;
+      modalAvatar.textContent = initials(p.name);
+      modalTitle.textContent = p.name;
+      modalRole.textContent = p.role;
+      modalBio.textContent = p.bio;
+      statKD.textContent = p.kd.toFixed(2);
+      statRating.textContent = p.rating.toFixed(1);
+      statGoals.textContent = p.goals;
+      statAssists.textContent = p.assists;
+      statMatches.textContent = p.matches;
+      recentMatches.innerHTML = '';
+      // show 3 simulated recent match chips
+      for(let i=0;i<3;i++){
+        const chip = document.createElement('div');
+        chip.className = 'stat-pill';
+        chip.style.marginRight='6px';
+        const mm = matches[i] || {date:'TBD', opponent:'-', result: null};
+        chip.textContent = `${mm.date} vs ${mm.opponent}`;
+        recentMatches.appendChild(chip);
+      }
+      modalBackdrop.classList.add('open');
+      modalBackdrop.setAttribute('aria-hidden','false');
+      modalClose.focus();
+    }
+    modalClose.addEventListener('click', ()=> {
+      modalBackdrop.classList.remove('open');
+      modalBackdrop.setAttribute('aria-hidden','true');
+    });
+    modalBackdrop.addEventListener('click', (e)=> {
+      if(e.target === modalBackdrop) { modalBackdrop.classList.remove('open'); modalBackdrop.setAttribute('aria-hidden','true'); }
+    });
+    document.addEventListener('keydown', (e)=> {
+      if(e.key === 'Escape' && modalBackdrop.classList.contains('open')) { modalBackdrop.classList.remove('open'); modalBackdrop.setAttribute('aria-hidden','true'); }
+    });
+
+    /* ---------- VIDEO HIGHLIGHT MODAL ---------- */
+    const thumbs = document.querySelectorAll('.thumb');
+    const videoBackdrop = document.getElementById('videoBackdrop');
+    const videoClose = document.getElementById('videoClose');
+    const videoPlayer = document.getElementById('videoPlayer');
+    thumbs.forEach(t=>{
+      t.addEventListener('click', ()=> {
+        const src = t.getAttribute('data-video');
+        videoPlayer.innerHTML = `<div style="color:var(--muted)">Playing: ${src} (placeholder)</div>`;
+        videoBackdrop.classList.add('open');
+        videoBackdrop.setAttribute('aria-hidden','false');
+      });
+      t.addEventListener('keydown', (e)=> { if(e.key==='Enter') t.click(); });
+    });
+    videoClose.addEventListener('click', ()=> { videoBackdrop.classList.remove('open'); videoBackdrop.setAttribute('aria-hidden','true'); videoPlayer.innerHTML = 'Video placeholder'; });
+    videoBackdrop.addEventListener('click', (e)=> { if(e.target===videoBackdrop) { videoBackdrop.classList.remove('open'); videoBackdrop.setAttribute('aria-hidden','true'); videoPlayer.innerHTML = 'Video placeholder'; }});
+
+    /* ---------- TOURNIES / COUNTERS ---------- */
+    document.getElementById('tournamentsWon').textContent = trophyData.won;
+    document.getElementById('runnerUps').textContent = trophyData.runnerUps;
+    document.getElementById('top8').textContent = trophyData.top8;
+    document.getElementById('trophyCount').textContent = trophyData.won;
+
+    /* ---------- WIN RATE CALC ---------- */
+    const totalMatches = 120, wins = 92;
+    const winRate = Math.round((wins/totalMatches)*100);
+    document.getElementById('winRate').textContent = winRate + '%';
+
+    /* ---------- SUBSCRIBE FORM ---------- */
+    const subscribeForm = document.getElementById('subscribeForm');
+    const subMsg = document.getElementById('subMsg');
+    subscribeForm.addEventListener('submit', (e)=>{
+      e.preventDefault();
+      const email = document.getElementById('subEmail').value.trim();
+      if(!email) { subMsg.textContent = 'Please enter a valid email.'; return; }
+      // demo: just show message (replace with backend call)
+      subMsg.textContent = 'Thanks! You are subscribed (demo).';
+      subscribeForm.reset();
+    });
+
+    /* ---------- CALENDAR CTA (add to calendar) helper - creates ICS file ---------- */
+    function makeICS(title, startDate, desc=''){ // startDate in YYYY-MM-DD or YYYY-MM-DDTHH:MM
+      const dt = startDate.replace(/-/g,'') + 'T000000';
+      const uid = Date.now() + '@archbellfalcons';
+      return `BEGIN:VCALENDAR
+VERSION:2.0
+PRODID:-//Archbell Falcons//EN
+BEGIN:VEVENT
+UID:${uid}
+DTSTAMP:${dt}Z
+DTSTART:${dt}Z
+SUMMARY:${title}
+DESCRIPTION:${desc}
+END:VEVENT
+END:VCALENDAR`;
+    }
+    // Example: attach ICS tooltip to next match button
+    // (If you want a download link, we can build one per match.)
+
+    /* ---------- INITIAL small animation: animate numeric counters (trophies) ---------- */
+    function animateValue(el, start, end, duration=800){
+      let startTime = performance.now();
+      function step(now){
+        const progress = Math.min(1,(now-startTime)/duration);
+        el.textContent = Math.floor(start + (end-start)*progress);
+        if(progress < 1) requestAnimationFrame(step);
+      }
+      requestAnimationFrame(step);
+    }
+    animateValue(document.getElementById('tournamentsWon'), 0, trophyData.won);
+    animateValue(document.getElementById('runnerUps'), 0, trophyData.runnerUps);
+    animateValue(document.getElementById('top8'), 0, trophyData.top8);
+
+    /* ---------- Accessibility: keyboard focus outlines ---------- */
+    document.addEventListener('keyup', (e)=> {
+      if(e.key === 'Tab') document.body.classList.add('show-focus');
+    });
+
+    /* ---------- Extra: auto-calc MVP (highest rating) and mark them ---------- */
+    (function markMVPs(){
+      const topRating = Math.max(...players.map(p=>p.rating));
+      players.forEach(p=> { p.mvp = p.rating >= topRating - 0.2; });
+      renderPlayers(players);
+    })();
+
+    // Done.
+  </script>
+</body>
+</html>
+
+      l
+
